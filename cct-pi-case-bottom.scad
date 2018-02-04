@@ -7,36 +7,44 @@ pi_padding = 0.5;
 
 sd_card_slot_width = 12;
 
-shell_thickness = 0.8;
+shell_thickness = 1.2;
 
 standoff_height = 2;
 standoff_radius = 6.2/2;
+standoffs = [[3.5,3.5], [52.5,3.5], [3.5,61.5], [52.5,61.5]];
+
+network_port_x = 17;
+network_port_y = 20;
+network_port_z = 14;
+network_port_location = [pi_x - 10.25, pi_y, 0];
+
+usb_port_x = 14;
+usb_port_y = 15.2;
+usb_port_z = 16.5;
+usb_port_location = [[pi_x - 29, pi_y, 0], [pi_x - 47, pi_y, 0]];
 
 smoothness = 36;
 
-standoffs = [[3.5,3.5], [52.5,3.5], [3.5,61.5], [52.5,61.5]];
-
-difference() {
-    union() {
-        create_shell();
+translate([shell_thickness + pi_padding, shell_thickness + pi_padding, shell_thickness + standoff_height])
+    difference() {
+        union() {
+            create_shell();
+            for ( x = standoffs ) {
+                create_standoff(x[0], x[1]);
+            }
+        }
+        create_sd_card_slot();
+        create_composite_port();
+        create_hdmi_port();
+        create_power_port();
+        create_network_port();
+        for ( x = usb_port_location ) {
+            create_usb_port(x[0], x[1]);
+        }
         for ( x = standoffs ) {
-            create_standoff(x[0], x[1]);
+            create_screw_hole(x[0], x[1]);
         }
     }
-    create_sd_card_slot();
-    # create_composite_port();
-    # create_hdmi_port();
-    # create_power_port();
-    //create_network_port();
-    //create_usb_ports();
-    create_connectivity_ports();
-    for ( x = standoffs ) {
-        create_screw_hole(x[0], x[1]);
-    }
-}
-/*translate([pi_x/2,pi_y/2,0])
-    rotate(a = 90, v=[0,0,1])
-        # import("raspberrypi.stl");*/
 
 module create_shell() {
     translate([pi_corner_radius - shell_thickness - pi_padding, pi_corner_radius - shell_thickness - pi_padding,0-(shell_thickness+standoff_height)])
@@ -71,8 +79,8 @@ module create_hdmi_port() {
 }
 
 module create_network_port() {
-    translate([pi_x + shell_thickness + pi_padding - pi_corner_radius - 10.25 - (17/2),pi_y + shell_thickness + (2 * pi_padding) - pi_corner_radius - 1, shell_thickness + standoff_height + pi_z])
-        cube([17,shell_thickness + 2, composite_radius + 1]);
+    translate([network_port_location[0] - (network_port_x/2),network_port_location[1] + pi_padding - network_port_y,  pi_z])
+        cube([network_port_x,network_port_y + 2 * shell_thickness, network_port_z+1]);
 }
 
 module create_power_port() {
@@ -98,9 +106,7 @@ module create_standoff(x, y) {
         cylinder(h = standoff_height + shell_thickness, r = standoff_radius, $fn = smoothness);
 }
 
-module create_usb_ports() {
-    translate([pi_x + shell_thickness + pi_padding - pi_corner_radius - 29 - (16/2),pi_y + shell_thickness + (2 * pi_padding) - pi_corner_radius - 1, shell_thickness + standoff_height + pi_z])
-        cube([16,shell_thickness + 2, composite_radius + 1]);
-    translate([pi_x + shell_thickness + pi_padding - pi_corner_radius - 47 - (16/2),pi_y + shell_thickness + (2 * pi_padding) - pi_corner_radius - 1, shell_thickness + standoff_height + pi_z])
-        cube([16,shell_thickness + 2, composite_radius + 1]);   
+module create_usb_port(x, y) {
+     translate([x - (usb_port_x/2),y + pi_padding - usb_port_y, pi_z])
+        cube([usb_port_x,usb_port_y + 2 * shell_thickness, usb_port_z+1]);
 }
