@@ -63,6 +63,7 @@ translate([ shell_thickness + pi_padding + pi_x, shell_thickness + pi_padding, c
             for ( i = zip_tie_holes ) {
                 create_zip_tie_hole(i[0], i[1]);
             }
+            create_ventilation();
             trim_excess();
         }
 
@@ -142,6 +143,19 @@ module create_standoff(x, y) {
 module create_usb_port(x, y) {
      translate([x - (usb_port_x/2),y + pi_padding - usb_port_y, 0 - composite_radius])
         cube([usb_port_x,usb_port_y + 2 * shell_thickness, usb_port_z+1]);
+}
+
+module create_ventilation() {    
+    vent_area_width = pi_x - standoff_radius * 4 - shell_thickness;
+    vent_number = (vent_area_width / shell_thickness / 2) - ((vent_area_width / shell_thickness / 2) % 1);
+    vents_width = ((2 * vent_number) - 1) * shell_thickness;
+    echo(vent_area_width);
+    echo(vents_width);
+    translate([pi_x / 2 - vents_width / 2 - shell_thickness * 2,0 - pi_corner_radius - shell_thickness + 1,0])
+        for ( i = [1:vent_number] ) {
+            translate([(shell_thickness * i * 2), 0, shell_thickness])
+                cube([shell_thickness, shell_thickness + pi_corner_radius + 2, case_z + 1]);
+        }
 }
 
 module create_zip_tie_hole(x, y) {
