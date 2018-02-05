@@ -4,6 +4,8 @@ pi_y = 85;
 pi_z = 10.5;
 pi_corner_radius = 3;
 pi_padding = 0.5;
+ventilation = false;
+
 
 network_port_x = 17;
 network_port_y = 20;
@@ -58,12 +60,14 @@ translate([ shell_thickness + pi_padding + pi_x, shell_thickness + pi_padding, c
                 create_usb_port(i[0], i[1]);
             }
             for ( i = mounting_holes ) {
-                create_mounting_hole(i[0], i[1]);
+               create_mounting_hole(i[0], i[1]);
             }
             for ( i = zip_tie_holes ) {
                 create_zip_tie_hole(i[0], i[1]);
             }
-            create_ventilation();
+            if ( ventilation ) {
+                create_ventilation();
+            }
             trim_excess();
         }
 
@@ -100,7 +104,14 @@ module create_hdmi_port() {
 
 module create_mounting_hole(x ,y) {
     translate([x, y, case_z - (shell_thickness * 0.5)])
-        cylinder( h = shell_thickness * 2, r = mounting_hole_radius, $fn=smoothness);
+        union() {
+            translate([mounting_hole_radius,0,0])
+                cylinder( h = shell_thickness * 2, r = mounting_hole_radius, $fn=smoothness);
+                translate([0,0,shell_thickness])
+                    cube([mounting_hole_radius * 2, mounting_hole_radius * 2,shell_thickness * 2], center = true);
+            translate([0-mounting_hole_radius,0,0])
+                cylinder( h = shell_thickness * 2, r = mounting_hole_radius, $fn=smoothness);
+        }
 }
 
 module create_network_port() {
